@@ -9,7 +9,7 @@ The project/API Scaffolding was generated using Swagger Codegen https://github.c
   --model-package com.chtrembl.petstore.order.model \
   --group-id com.chtrembl.petstore.order \
   --artifact-id petstoreorderservice \
-  --artifact-version 0.0.1-SNAPSHOT \
+  --artifact-version 2.0.0 \
   -l spring \
   -o petstoreorderservice
 ```
