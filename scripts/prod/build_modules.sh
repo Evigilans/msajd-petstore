@@ -14,7 +14,7 @@ function buildModule() {
   sleep 5s
 }
 
-cd ..
+cd ../..
 buildModule petstoreapp
 buildModule petstoreorderservice
 buildModule petstorepetservice

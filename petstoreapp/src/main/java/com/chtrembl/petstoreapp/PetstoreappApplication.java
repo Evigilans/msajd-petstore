@@ -10,16 +10,16 @@ import java.net.UnknownHostException;
 
 @SpringBootApplication
 public class PetstoreappApplication {
-	private static Logger logger = LoggerFactory.getLogger(PetstoreappApplication.class);
+    private static Logger logger = LoggerFactory.getLogger(PetstoreappApplication.class);
 
-	public static void main(String[] args) {
-		SpringApplication.run(PetstoreappApplication.class, args);
-		logger.info("PetStoreApp started up... " + System.getProperty("catalina.base"));
-		try {
-			InetAddress address = InetAddress.getByName("www.google.com");
-			logger.info("GOOGLE: " + address.getHostAddress());
-		} catch (UnknownHostException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PetstoreappApplication.class, args);
+        logger.info("PetStoreApp started up... " + System.getProperty("catalina.base"));
+        try {
+            InetAddress address = InetAddress.getByName("www.google.com");
+            logger.info("GOOGLE: " + address.getHostAddress());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

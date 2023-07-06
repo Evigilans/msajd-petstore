@@ -1,15 +1,10 @@
 package com.chtrembl.petstoreapp.controller;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.chtrembl.petstoreapp.model.*;
+import com.chtrembl.petstoreapp.service.PetStoreService;
+import com.chtrembl.petstoreapp.service.SearchService;
+import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
+import com.nimbusds.jose.shaded.json.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +22,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import com.chtrembl.petstoreapp.model.ContainerEnvironment;
-import com.chtrembl.petstoreapp.model.Order;
-import com.chtrembl.petstoreapp.model.Pet;
-import com.chtrembl.petstoreapp.model.User;
-import com.chtrembl.petstoreapp.model.WebPages;
-import com.chtrembl.petstoreapp.service.PetStoreService;
-import com.chtrembl.petstoreapp.service.SearchService;
-import com.microsoft.applicationinsights.telemetry.PageViewTelemetry;
-import com.nimbusds.jose.shaded.json.JSONArray;
+import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
 
 /**
  * Web Controller for all of the model/presentation construction and various
@@ -184,7 +174,7 @@ public class WebAppController {
 	@GetMapping(value = "/products")
 	public String products(Model model, OAuth2AuthenticationToken token, HttpServletRequest request,
 			@RequestParam(name = "category") String category, @RequestParam(name = "id") int id)
-			throws URISyntaxException {
+			throws Exception {
 
 		// quick validation, should really be done in validators, check for cross side
 		// scripting etc....

@@ -4,14 +4,7 @@ package com.chtrembl.petstoreapp.service;
  * Implementation for service calls to the APIM/AKS
  */
 
-import com.chtrembl.petstoreapp.model.Category;
-import com.chtrembl.petstoreapp.model.ContainerEnvironment;
-import com.chtrembl.petstoreapp.model.Order;
-import com.chtrembl.petstoreapp.model.Pet;
-import com.chtrembl.petstoreapp.model.Product;
-import com.chtrembl.petstoreapp.model.Tag;
-import com.chtrembl.petstoreapp.model.User;
-import com.chtrembl.petstoreapp.model.WebRequest;
+import com.chtrembl.petstoreapp.model.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,9 +20,7 @@ import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -118,61 +108,79 @@ public class PetStoreServiceImpl implements PetStoreService {
 	}
 
 	@Override
-	public Collection<Product> getProducts(String category, List<Tag> tags) {
+	public Collection<Product> getProducts(String category, List<Tag> tags) throws Exception {
 		List<Product> products = new ArrayList<>();
 
-		try {
-			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
-			products = this.productServiceWebClient.get()
-					.uri("petstoreproductservice/v2/product/findByStatus?status=available")
-					.accept(MediaType.APPLICATION_JSON)
-					.headers(consumer)
-					.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-					.header("Cache-Control", "no-cache")
-					.retrieve()
-					.bodyToMono(new ParameterizedTypeReference<List<Product>>() {
-					}).block();
+		if (canMoveFurther()) {
+			try {
+				Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
+				products = this.productServiceWebClient.get()
+						.uri("petstoreproductservice/v2/product/findByStatus?status=available")
+						.accept(MediaType.APPLICATION_JSON)
+						.headers(consumer)
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("Cache-Control", "no-cache")
+						.retrieve()
+						.bodyToMono(new ParameterizedTypeReference<List<Product>>() {
+						}).block();
 
-			// use this for look up on details page, intentionally avoiding spring cache to
-			// ensure service calls are made each for each browser session
-			// to show Telemetry with APIM requests (normally this would be cached in a real
-			// world production scenario)
-			this.sessionUser.setProducts(products);
+				// use this for look up on details page, intentionally avoiding spring cache to
+				// ensure service calls are made each for each browser session
+				// to show Telemetry with APIM requests (normally this would be cached in a real
+				// world production scenario)
+				this.sessionUser.setProducts(products);
 
-			// filter this specific request per category
-			if (tags.stream().anyMatch(t -> t.getName().equals("large"))) {
-				products = products.stream().filter(product -> category.equals(product.getCategory().getName())
-						&& product.getTags().toString().contains("large")).collect(Collectors.toList());
-			} else {
+				// filter this specific request per category
+				if (tags.stream().anyMatch(t -> t.getName().equals("large"))) {
+					products = products.stream().filter(product -> category.equals(product.getCategory().getName())
+							&& product.getTags().toString().contains("large")).collect(Collectors.toList());
+				} else {
 
-				products = products.stream().filter(product -> category.equals(product.getCategory().getName())
-						&& product.getTags().toString().contains("small")).collect(Collectors.toList());
+					products = products.stream().filter(product -> category.equals(product.getCategory().getName())
+							&& product.getTags().toString().contains("small")).collect(Collectors.toList());
+				}
+
+				Map<String, Double> metrics = new HashMap<>();
+				metrics.put("NUMBER_OF_PRODUCTS", (double) products.size());
+
+				this.sessionUser.getTelemetryClient().trackEvent(
+						String.format("PetStoreApp user %s is requesting to retrieve products from the PetStorePetService",
+								this.sessionUser.getName()),
+						this.sessionUser.getCustomEventProperties(), metrics);
+
+				return products;
+			} catch (
+
+					WebClientException wce) {
+				// little hack to visually show the error message within our Azure Pet Store
+				// Reference Guide (Academic Tutorial)
+				Product product = new Product();
+				product.setName(wce.getMessage());
+				product.setPhotoURL("");
+				product.setCategory(new Category());
+				product.setId((long) 0);
+				products.add(product);
+			} catch (IllegalArgumentException iae) {
+				// little hack to visually show the error message within our Azure Pet Store
+				// Reference Guide (Academic Tutorial)
+				Product product = new Product();
+				product.setName(
+						"petstore.service.url:${PETSTOREPRODUCTSERVICE_URL} needs to be enabled for this service to work"
+								+ iae.getMessage());
+				product.setPhotoURL("");
+				product.setCategory(new Category());
+				product.setId((long) 0);
+				products.add(product);
 			}
-			return products;
-		} catch (
-
-		WebClientException wce) {
-			// little hack to visually show the error message within our Azure Pet Store
-			// Reference Guide (Academic Tutorial)
-			Product product = new Product();
-			product.setName(wce.getMessage());
-			product.setPhotoURL("");
-			product.setCategory(new Category());
-			product.setId((long) 0);
-			products.add(product);
-		} catch (IllegalArgumentException iae) {
-			// little hack to visually show the error message within our Azure Pet Store
-			// Reference Guide (Academic Tutorial)
-			Product product = new Product();
-			product.setName(
-					"petstore.service.url:${PETSTOREPRODUCTSERVICE_URL} needs to be enabled for this service to work"
-							+ iae.getMessage());
-			product.setPhotoURL("");
-			product.setCategory(new Category());
-			product.setId((long) 0);
-			products.add(product);
+		} else {
+			throw new Exception("Cannot move further");
 		}
+
 		return products;
+	}
+
+	private boolean canMoveFurther() {
+		return new Random().nextInt() % 3 != 0;
 	}
 
 	@Override
