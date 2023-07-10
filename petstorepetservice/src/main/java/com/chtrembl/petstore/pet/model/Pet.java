@@ -1,53 +1,68 @@
 package com.chtrembl.petstore.pet.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
-import org.springframework.validation.annotation.Validated;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.validation.annotation.Validated;
+
+import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Pet
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-20T15:31:39.272-05:00")
-
+@Entity
+@Table(name = "pet")
 public class Pet {
-	@JsonProperty("id")
-	private Long id;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false)
+	@JsonProperty("id")
+	private long id;
+
+	@ManyToOne
 	@JsonProperty("category")
 	private Category category;
 
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
 	private String name;
 
+	@Column(name = "photourl", nullable = false)
 	@JsonProperty("photoURL")
 	@Valid
 	private String photoURL;
 
-	@JsonProperty("tags")
+	@ManyToMany
+	@JoinTable(
+			name = "pet_tag",
+			joinColumns = @JoinColumn(name = "pet_id"),
+			inverseJoinColumns = @JoinColumn(name = "tag_id"))
 	@Valid
 	private List<Tag> tags = null;
+
+	@Column(name = "status", nullable = false)
+	@Enumerated(EnumType.STRING)
+	@JsonProperty("status")
+	private StatusEnum status;
 
 	/**
 	 * pet status in the store
 	 */
 	public enum StatusEnum {
-		AVAILABLE("available"),
+		available("available"),
 
-		PENDING("pending"),
+		pending("pending"),
 
-		SOLD("sold");
+		sold("sold");
 
 		private String value;
 
@@ -76,9 +91,6 @@ public class Pet {
 		}
 	}
 
-	@JsonProperty("status")
-	private StatusEnum status;
-
 	public Pet id(Long id) {
 		this.id = id;
 		return this;
@@ -86,7 +98,7 @@ public class Pet {
 
 	/**
 	 * Get id
-	 * 
+	 *
 	 * @return id
 	 */
 	@ApiModelProperty(value = "")
@@ -106,7 +118,7 @@ public class Pet {
 
 	/**
 	 * Get category
-	 * 
+	 *
 	 * @return category
 	 */
 	@ApiModelProperty(value = "")
@@ -128,7 +140,7 @@ public class Pet {
 
 	/**
 	 * Get name
-	 * 
+	 *
 	 * @return name
 	 */
 	@ApiModelProperty(example = "doggie", required = true, value = "")
@@ -144,7 +156,7 @@ public class Pet {
 
 	/**
 	 * Get photoUrls
-	 * 
+	 *
 	 * @return photoUrls
 	 */
 	@ApiModelProperty(required = true, value = "")
@@ -173,7 +185,7 @@ public class Pet {
 
 	/**
 	 * Get tags
-	 * 
+	 *
 	 * @return tags
 	 */
 	@ApiModelProperty(value = "")
@@ -195,7 +207,7 @@ public class Pet {
 
 	/**
 	 * pet status in the store
-	 * 
+	 *
 	 * @return status
 	 */
 	@ApiModelProperty(value = "pet status in the store")

@@ -4,5 +4,10 @@ az storage account create \
   --resource-group MSAJDGroup \
   --location westeurope \
   --sku Standard_LRS \
-  --tier Standard \
-  --kind StorageV2
+  --kind BlobStorage
+
+az functionapp create \
+  --name msajd-order-reserver \
+  --resource-group MSAJDGroup \
+  --storage-account msajdsa \
+  --deployment-source-url "https://github.com/Evigilans/petstoreorderreserver"

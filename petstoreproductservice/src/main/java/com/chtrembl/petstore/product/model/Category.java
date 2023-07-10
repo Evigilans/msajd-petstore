@@ -1,25 +1,30 @@
 package com.chtrembl.petstore.product.model;
 
-import java.util.Objects;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
+import javax.persistence.*;
+import java.util.Objects;
 
 /**
  * Category
  */
 @Validated
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-20T15:31:39.272-05:00")
-
+@Entity
+@Table(name = "category")
 public class Category {
-	@JsonProperty("id")
-	private Long id = null;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false)
+	@JsonProperty("id")
+	private long id;
+
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
-	private String name = null;
+	private String name;
 
 	public Category id(Long id) {
 		this.id = id;
@@ -28,7 +33,7 @@ public class Category {
 
 	/**
 	 * Get id
-	 * 
+	 *
 	 * @return id
 	 **/
 	@ApiModelProperty(value = "")
@@ -48,7 +53,7 @@ public class Category {
 
 	/**
 	 * Get name
-	 * 
+	 *
 	 * @return name
 	 **/
 	@ApiModelProperty(value = "")
