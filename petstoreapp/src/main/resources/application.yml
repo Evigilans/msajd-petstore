@@ -10,6 +10,8 @@ petstore:
       url: ${PETSTOREPRODUCTSERVICE_URL:http://localhost:8080}
     order:
       url: ${PETSTOREORDERSERVICE_URL:http://localhost:8080}
+    order-reserver:
+      url: ${PETSTOREORDERRESERVER_URL:http://localhost:8080}
   logging:
     additional-headers-to-log: ${PETSTORE_ADDITIONAL_HEADERS_TO_LOG:}
     additional-headers-to-send: ${PETSTORE_ADDITIONAL_HEADERS_TO_SEND:}
@@ -39,6 +41,3 @@ spring:
     cache: false
   cache:
     cache-names: currentUsers
-#azure:
-#  application-insights:
-#    instrumentation-key: ${INSTRUMENTATION_KEY}

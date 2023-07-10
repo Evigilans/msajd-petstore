@@ -43,10 +43,10 @@ public class TelemetryClient extends com.microsoft.applicationinsights.Telemetry
 	public void trackEvent(String name, Map<String, String> properties, Map<String, Double> metrics) {
 		logger.warn("TelemetryClient: %l telemetry: %s%n", System.currentTimeMillis(), name);
 
-		if (!properties.isEmpty()) {
+		if (properties != null && !properties.isEmpty()) {
 			properties.forEach((key, value) -> logger.warn("TelemetryClient Properties: \t%s: %s%n", key, value));
 		}
-		if (!metrics.isEmpty()) {
+		if (metrics != null && !metrics.isEmpty()) {
 			metrics.forEach((key, value) -> logger.warn("TelemetryClient Metrics: \t%s: %s%n", key, value));
 		}
 	}
@@ -100,7 +100,7 @@ public class TelemetryClient extends com.microsoft.applicationinsights.Telemetry
 
 	@Override
 	public void trackPageView(PageViewTelemetry telemetry) {
-		logger.error("TelemetryClient: %s: %s%n", System.currentTimeMillis(), telemetry.getUri());
+		logger.error("TelemetryClient: %s: %s \n", System.currentTimeMillis(), telemetry.getUri());
 		if (!telemetry.getProperties().isEmpty()) {
 			telemetry.getProperties().forEach((key, value) -> logger.warn("TelemetryClient Properties: \t%s: %s%n", key, value));
 		}

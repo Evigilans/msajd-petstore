@@ -11,12 +11,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class PetStoreServiceImpl implements PetStoreService {
+	public static final String OK_STATUS = "OK";
 	private static final Logger logger = LoggerFactory.getLogger(PetStoreServiceImpl.class);
 
 	private final User sessionUser;
@@ -35,6 +37,7 @@ public class PetStoreServiceImpl implements PetStoreService {
 	private WebClient petServiceWebClient = null;
 	private WebClient productServiceWebClient = null;
 	private WebClient orderServiceWebClient = null;
+	private WebClient orderReserverWebClient = null;
 
 	public PetStoreServiceImpl(User sessionUser, ContainerEnvironment containerEnvironment, WebRequest webRequest) {
 		this.sessionUser = sessionUser;
@@ -180,7 +183,8 @@ public class PetStoreServiceImpl implements PetStoreService {
 	}
 
 	private boolean canMoveFurther() {
-		return new Random().nextInt() % 3 != 0;
+		//return new Random().nextInt() % 3 != 0;
+		return true;
 	}
 
 	@Override
@@ -195,9 +199,10 @@ public class PetStoreServiceImpl implements PetStoreService {
 
 			updatedOrder.setId(this.sessionUser.getSessionId());
 			updatedOrder.setEmail(this.sessionUser.getEmail());
+			updatedOrder.setTimestamp(System.currentTimeMillis());
 
 			if (completeOrder) {
-				updatedOrder.setComplete(true);
+				updatedOrder.set`Complete`(true);
 			} else {
 				List<Product> products = new ArrayList<Product>();
 				Product product = new Product();
@@ -210,21 +215,38 @@ public class PetStoreServiceImpl implements PetStoreService {
 			String orderJSON = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
 					.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 					.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(updatedOrder);
-
 			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
 
-			updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
-					.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
-					.accept(MediaType.APPLICATION_JSON)
-					.headers(consumer)
-					.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-					.header("Cache-Control", "no-cache")
-					.retrieve()
-					.bodyToMono(Order.class).block();
+			ResponseEntity<String> response = sendReservationRequest(orderJSON, consumer);
+			if (response.getStatusCode() == HttpStatus.OK && OK_STATUS.equalsIgnoreCase(response.getBody().toString())) {
+				updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
+						.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
+						.accept(MediaType.APPLICATION_JSON)
+						.headers(consumer)
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("Cache-Control", "no-cache")
+						.retrieve()
+						.bodyToMono(Order.class).block();
+			}
 
 		} catch (Exception e) {
 			logger.warn(e.getMessage());
 		}
+	}
+
+	private ResponseEntity<String> sendReservationRequest(String orderJSON, Consumer<HttpHeaders> consumer) {
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<String> requestEntity = new HttpEntity<>(orderJSON, headers);
+		String functionUrl = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(containerEnvironment.getPetStoreOrderReserverURL())
+				.path("api/update")
+				.toUriString();
+
+		return restTemplate.exchange(functionUrl, HttpMethod.POST, requestEntity, String.class);
 	}
 
 	@Override

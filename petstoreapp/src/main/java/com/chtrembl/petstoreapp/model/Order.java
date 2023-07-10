@@ -1,16 +1,15 @@
 package com.chtrembl.petstoreapp.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.stereotype.Component;
+
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Order
@@ -68,6 +67,9 @@ public class Order implements Serializable {
 
 	@JsonProperty("complete")
 	private Boolean complete = false;
+
+	@JsonProperty("timestamp")
+	private long timestamp;
 
 	public Order id(String id) {
 		this.id = id;
@@ -174,6 +176,15 @@ public class Order implements Serializable {
 	public void setComplete(Boolean complete) {
 		this.complete = complete;
 	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+
 
 	@Override
 	public boolean equals(java.lang.Object o) {

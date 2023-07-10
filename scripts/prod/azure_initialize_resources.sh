@@ -6,7 +6,7 @@ function createPlan() {
 
   echo "Creating a plan for $APP_NAME in $LOCATION region..."
   az appservice plan create \
-    --name evi-$APP_NAME-$LOCATION-plan \
+    --name msajd-$APP_NAME-$LOCATION-plan \
     --resource-group MSAJDGroup \
     --is-linux \
     --sku $SKU_TYPE \
@@ -41,10 +41,10 @@ fi
 
 echo "Creating traffic-manager..."
 az network traffic-manager profile create \
-  --name evi-petstoreapp-tm \
+  --name msajd-petstoreapp-tm \
   --resource-group MSAJDGroup \
   --routing-method Priority \
-  --unique-dns-name evi-tm-dns \
+  --unique-dns-name msajd-tm-dns \
   --ttl 30 \
   --output none
 
