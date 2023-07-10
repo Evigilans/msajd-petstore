@@ -37,7 +37,6 @@ public class PetStoreServiceImpl implements PetStoreService {
 	private WebClient petServiceWebClient = null;
 	private WebClient productServiceWebClient = null;
 	private WebClient orderServiceWebClient = null;
-	private WebClient orderReserverWebClient = null;
 
 	public PetStoreServiceImpl(User sessionUser, ContainerEnvironment containerEnvironment, WebRequest webRequest) {
 		this.sessionUser = sessionUser;
@@ -202,7 +201,7 @@ public class PetStoreServiceImpl implements PetStoreService {
 			updatedOrder.setTimestamp(System.currentTimeMillis());
 
 			if (completeOrder) {
-				updatedOrder.set`Complete`(true);
+				updatedOrder.setComplete(true);
 			} else {
 				List<Product> products = new ArrayList<Product>();
 				Product product = new Product();
@@ -217,17 +216,17 @@ public class PetStoreServiceImpl implements PetStoreService {
 					.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(updatedOrder);
 			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
 
-			ResponseEntity<String> response = sendReservationRequest(orderJSON, consumer);
-			if (response.getStatusCode() == HttpStatus.OK && OK_STATUS.equalsIgnoreCase(response.getBody().toString())) {
-				updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
-						.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
-						.accept(MediaType.APPLICATION_JSON)
-						.headers(consumer)
-						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-						.header("Cache-Control", "no-cache")
-						.retrieve()
-						.bodyToMono(Order.class).block();
-			}
+//			ResponseEntity<String> response = sendReservationRequest(orderJSON, consumer);
+//			if (response.getStatusCode() == HttpStatus.OK && OK_STATUS.equalsIgnoreCase(response.getBody().toString())) {
+//			}
+			updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
+					.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
+					.accept(MediaType.APPLICATION_JSON)
+					.headers(consumer)
+					.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+					.header("Cache-Control", "no-cache")
+					.retrieve()
+					.bodyToMono(Order.class).block();
 
 		} catch (Exception e) {
 			logger.warn(e.getMessage());
