@@ -2,10 +2,10 @@ springfoxdocumentation:
   swagger:
     v2:
       path: /api-docs
-      
+
 server:
   port: ${PETSTOREPRODUCTSERVICE_SERVER_PORT:8080}
-  
+
 spring:
   application:
     name: petstoreproductservice
@@ -13,9 +13,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: "jdbc:postgresql://msajd-petstore.postgres.database.azure.com:5432/petstore?currentSchema=petstoreproductservice_db"
-    username: "msajd"
-    password: "paSSw0rd"
+    url: ${dbProductServiceUrl}
+    username: ${dbUser}
+    password: ${dbPassword}
     driver-class-name: org.postgresql.Driver
   jpa:
     database: POSTGRESQL
@@ -26,15 +26,21 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
     show-sql: false
+  cloud:
+    azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            endpoint: https://msajdkv.vault.azure.net/
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"       
+        include: "*"
   trace:
     http:
-      enabled: true 
+      enabled: true
   endpoint:
     httptrace:
       enabled: true

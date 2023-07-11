@@ -13,9 +13,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: "jdbc:postgresql://msajd-petstore.postgres.database.azure.com:5432/petstore?currentSchema=petstorepetservice_db"
-    username: "msajd"
-    password: "paSSw0rd"
+    url: ${dbPetServiceUrl}
+    username: ${dbUser}
+    password: ${dbPassword}
     driver-class-name: org.postgresql.Driver
   jpa:
     database: POSTGRESQL
@@ -26,6 +26,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
     show-sql: false
+  cloud:
+    azure:
+      keyvault:
+        secret:
+          property-sources[0]:
+            endpoint: https://msajdkv.vault.azure.net/
 
 management:
   endpoints:

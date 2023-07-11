@@ -9,7 +9,7 @@ server:
 petstore:
   service:
     product:
-      url: ${PETSTOREPRODUCTSERVICE_URL:http://localhost:8080}
+      url: ${productServiceUrl:http://localhost:8082}
 
 spring:
   application:
@@ -20,9 +20,13 @@ spring:
   cloud:
     azure:
       cosmos:
-        endpoint: https://msajd-cosmosdb.documents.azure.com:443/
+        endpoint: ${dbOrderServiceUrl}
         database: petstoreorderservice_db
-        resource-token: ${RESOURCE_TOKEN}
+        resource-token: ${dbOrderServiceToken}
+      keyvault:
+        secret:
+          property-sources[0]:
+            endpoint: https://msajdkv.vault.azure.net/
 
 management:
   endpoints:
@@ -35,4 +39,3 @@ management:
   endpoint:
     httptrace:
       enabled: true
-
