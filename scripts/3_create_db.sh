@@ -40,3 +40,18 @@ az cosmosdb sql container create \
   --name order \
   --partition-key-path "/id" \
   --resource-group MSAJDGroup
+
+az storage account create \
+  --name msajdsa \
+  --resource-group MSAJDGroup \
+  --location westeurope \
+  --sku Standard_LRS \
+  --kind StorageV2 \
+  --access-tier Cool
+
+sleep 30s
+
+az storage container create \
+  --name msajdsa-blob \
+  --account-name msajdsa \
+  --public-access blob

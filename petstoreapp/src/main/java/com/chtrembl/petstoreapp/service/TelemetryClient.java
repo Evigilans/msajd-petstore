@@ -100,7 +100,7 @@ public class TelemetryClient extends com.microsoft.applicationinsights.Telemetry
 
 	@Override
 	public void trackPageView(PageViewTelemetry telemetry) {
-		logger.error("TelemetryClient: %s: %s \n", System.currentTimeMillis(), telemetry.getUri());
+		logger.error(String.format("TelemetryClient: %s: %s", System.currentTimeMillis(), telemetry.getUri()));
 		if (!telemetry.getProperties().isEmpty()) {
 			telemetry.getProperties().forEach((key, value) -> logger.warn("TelemetryClient Properties: \t%s: %s%n", key, value));
 		}

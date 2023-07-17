@@ -94,6 +94,10 @@
             <artifactId>spring-cloud-azure-starter-keyvault</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-servicebus</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>applicationinsights-logging-logback</artifactId>
             <version>2.6.1</version>

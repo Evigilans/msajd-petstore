@@ -48,4 +48,4 @@ az network traffic-manager profile create \
   --output none
 
 runWebApp westeurope 1
-# runWebApp northeurope 2
+runWebApp northeurope 2

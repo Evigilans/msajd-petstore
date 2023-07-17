@@ -51,3 +51,21 @@ spring:
         secret:
           property-sources[0]:
             endpoint: https://msajdkv.vault.azure.net/
+      servicebus:
+        namespace: msjad-servicebus
+        entity-name: msjad-reserve-queue
+        entity-type: queue
+        connection-string: ${serviceBusConnectionString}
+
+azure:
+  activedirectory:
+    b2c:
+      tenant: msajdaad
+      oidc-enabled: true
+      client-id: ${b2cClientId}
+      client-secret: ${b2cClientSecret}
+      reply-url: http://localhost:8080/login/oauth2/code/
+      logout-success-url: http://localhost:8080/logout
+      user-flows:
+        sign-up-or-sign-in: B2C_1_msajd_signin_signup_workflow
+      user-name-attribute-name: name

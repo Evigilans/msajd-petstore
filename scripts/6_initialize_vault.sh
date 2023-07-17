@@ -16,7 +16,11 @@ secrets=(
   "dbUser:msajd"
   "dbPassword:paSSw0rd"
   "dbOrderServiceUrl:https://msajd-cosmosdb.documents.azure.com:443/"
-  "dbOrderServiceToken:kWj7iIl4hT19xwrNouVKAxoSqVwjKO8NEKkoEooMWqDFVRp6u2BYNpzMH1ch2j7HIfG76z00qICwACDbkfU94w=="
+  "storageAccountConnectionString:"
+  "dbOrderServiceToken:"
+  "serviceBusConnectionString:"
+  "b2cClientId:"
+  "b2cClientSecret:"
 )
 
 for secret in "${secrets[@]}"; do

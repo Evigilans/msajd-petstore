@@ -50,7 +50,7 @@ az network traffic-manager profile create \
 
 echo "Creating plans..."
 createPlan petstoreapp westeurope S1
-# createPlan petstoreapp northeurope S1
+createPlan petstoreapp northeurope S1
 createPlan petstorepetservice westeurope S1
 createPlan petstoreorderservice westeurope S1
 createPlan petstoreproductservice westeurope S1

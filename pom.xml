@@ -21,5 +21,6 @@
         <module>petstoreorderservice</module>
         <module>petstorepetservice</module>
         <module>petstoreproductservice</module>
+        <module>petstoreorderreserver</module>
     </modules>
 </project>

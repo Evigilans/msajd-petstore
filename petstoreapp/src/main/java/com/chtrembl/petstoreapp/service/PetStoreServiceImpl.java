@@ -4,6 +4,8 @@ package com.chtrembl.petstoreapp.service;
  * Implementation for service calls to the APIM/AKS
  */
 
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.chtrembl.petstoreapp.model.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,13 +13,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -34,14 +35,17 @@ public class PetStoreServiceImpl implements PetStoreService {
 	private final ContainerEnvironment containerEnvironment;
 	private final WebRequest webRequest;
 
+	private final ServiceBusSenderClient senderClient;
+
 	private WebClient petServiceWebClient = null;
 	private WebClient productServiceWebClient = null;
 	private WebClient orderServiceWebClient = null;
 
-	public PetStoreServiceImpl(User sessionUser, ContainerEnvironment containerEnvironment, WebRequest webRequest) {
+	public PetStoreServiceImpl(User sessionUser, ContainerEnvironment containerEnvironment, WebRequest webRequest, ServiceBusSenderClient senderClient) {
 		this.sessionUser = sessionUser;
 		this.containerEnvironment = containerEnvironment;
 		this.webRequest = webRequest;
+		this.senderClient = senderClient;
 	}
 
 	@PostConstruct
@@ -216,9 +220,7 @@ public class PetStoreServiceImpl implements PetStoreService {
 					.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(updatedOrder);
 			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
 
-//			ResponseEntity<String> response = sendReservationRequest(orderJSON, consumer);
-//			if (response.getStatusCode() == HttpStatus.OK && OK_STATUS.equalsIgnoreCase(response.getBody().toString())) {
-//			}
+			sendReservationRequest(orderJSON);
 			updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
 					.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
 					.accept(MediaType.APPLICATION_JSON)
@@ -233,19 +235,9 @@ public class PetStoreServiceImpl implements PetStoreService {
 		}
 	}
 
-	private ResponseEntity<String> sendReservationRequest(String orderJSON, Consumer<HttpHeaders> consumer) {
-		RestTemplate restTemplate = new RestTemplate();
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		HttpEntity<String> requestEntity = new HttpEntity<>(orderJSON, headers);
-		String functionUrl = UriComponentsBuilder.newInstance()
-				.scheme("https")
-				.host(containerEnvironment.getPetStoreOrderReserverURL())
-				.path("api/update")
-				.toUriString();
-
-		return restTemplate.exchange(functionUrl, HttpMethod.POST, requestEntity, String.class);
+	private void sendReservationRequest(String orderJSON) {
+		senderClient.sendMessage(new ServiceBusMessage(orderJSON));
+		senderClient.close();
 	}
 
 	@Override
